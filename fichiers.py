@@ -1,24 +1,32 @@
 import decryptage as d
+from cryptage import Huffman
+
 
 def ouverture_fichier(fichier):
     """ str -> file
     Ouvre un fichier texte.
     """
-    
-    fichier = open(fichier, "r", encoding = 'utf8')
+
+    fichier = open(fichier, "r", encoding='utf8')
     return fichier
+
 
 def table_encodage(fichier):
     """ str -> tab
     Renvoie un tableau avec tous les éléments d'un fichier texte codés selon l'encodage de Huffman.
     """
-    
+
     texte = ouverture_fichier(fichier)
     texte = texte.read()
-    # tab = nuk(texte)
-    # abr = creation_arbre(tab)
-    # tab = encodage(tab, abr)
-    # return tab
+
+    t = Huffman(texte)
+    tab = t.occurence()
+
+    abr = t.creation_arbre(tab)
+    tab = t.creation_table_encodage(abr)
+
+    return tab
+
 
 def compression_char(fichier):
     """ str -> tab
@@ -35,19 +43,21 @@ def compression_char(fichier):
                 tab2 += tab[i][1]
     return tab2
 
+
 def compression_texte():
     """ -> str
     Renvoie un string des caractères d'un texte codés selon l'encodage de Huffman."""
-    
+
     tab = compression_char()
     encodage = str()
     for k in range(len(tab)):
         encodage += str(tab[k])
     return encodage
 
+
 def enregistrement_encodage():
     """Enregistre le fichier texte encodé."""
-    
+
     texte = open("fichier_encode.txt", "w")
     a = compression_texte()
     texte.write(a)
@@ -56,6 +66,7 @@ def enregistrement_encodage():
     tab = str(table_encodage())
     texte.write(tab)
     texte.close()
+
 
 def decodage_texte(fichier_a_decoder, cle):
     """ str, tab -> tab
@@ -75,19 +86,21 @@ def decodage_texte(fichier_a_decoder, cle):
             tmp = []
     return tab2
 
+
 def decompression_texte():
     """ -> str
     Renvoie un texte décodé."""
-    
+
     tab = decodage_texte()
     decodage = str()
     for k in range(len(tab)):
         decodage += str(tab[k])
     return decodage
 
+
 def enregistrement_decodage():
     """Enregistre le fichier texte décodé."""
-    
+
     texte = open("fichier_decode.txt", "w", encoding='utf8')
     a = decompression_texte()
     texte.write(a)
