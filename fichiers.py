@@ -73,18 +73,8 @@ def decodage_texte(fichier_a_decoder, cle):
     Renvoie un tableau avec tous les éléments d'un fichier texte décodés.
     """
 
-    tab = cle
-    tmp = []
-    tab2 = []
-    texte_encode = ouverture_fichier(fichier_a_decoder)
-    texte_encode = texte_encode.read()
-    for code in texte_encode:
-        tmp.append(int(code))
-        a = d.decodage_char(tab, tmp)
-        if a is not None:
-            tab2.append(a)
-            tmp = []
-    return tab2
+    def set_texte_encode(self, texte_encode):
+        self.texte_encode = open(texte_encode, "r", encoding='utf8').read()
 
 
 def decompression_texte():
