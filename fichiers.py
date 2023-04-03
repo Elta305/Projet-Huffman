@@ -1,6 +1,5 @@
 import decryptage as d
 import cryptage as c
-import ast
 
 class Fichier:
     def __init__(self, f, c, t):
@@ -30,8 +29,8 @@ class Fichier:
         self.texte_encode = texte_encode
 
     def table_encodage(self):
-        """ str -> tab
-        Renvoie un tableau avec tous les éléments d'un fichier texte codés selon l'encodage de Huffman.
+        """
+        Attribue à self.cle un tableau avec tous les éléments d'un fichier texte codés selon l'encodage de Huffman.
         """
         
         texte = self.fichier
@@ -53,7 +52,8 @@ class Fichier:
         return encodage
 
     def enregistrement_encodage(self):
-        """Enregistre le fichier texte encodé."""
+        """ -> str
+        Enregistre le fichier texte encodé."""
         
         texte = open("fichier_encode.txt", "w")
         a = self.compression_texte()
@@ -62,7 +62,8 @@ class Fichier:
         return a
 
     def enregistrement_cle(self):
-        """Enregistre la clé de l'encodage de Huffman."""
+        """ -> str
+        Enregistre la clé de l'encodage de Huffman."""
         
         texte = open("cle_encodage.txt", "w", encoding='utf8')
         dic = str(self.cle)
@@ -71,36 +72,27 @@ class Fichier:
         return dic
 
     def decodage_texte(self):
-        """ str, tab -> tab
-        Renvoie un tableau avec tous les éléments d'un fichier texte décodés.
-        """
-
-        tmp = []
-        tab2 = []
-        for code in self.texte_encode:
-            tmp.append(int(code))
-            self.cle = ast.literal_eval(self.cle)
-            a = d.decodage_char(self.cle, tmp)
-            if a is not None:
-                tab2.append(a)
-                tmp = []
-        return tab2
-
-    def decompression_texte(self):
         """ -> str
         Renvoie un texte décodé."""
         
-        tab = self.decodage_texte()
-        decodage = str()
-        for k in range(len(tab)):
-            decodage += str(tab[k])
+        tmp = ""
+        decodage = ""
+        self.cle = eval(self.cle)
+        for code in self.texte_encode:
+            tmp += code
+            a = d.decodage_char(self.cle, tmp)
+            if a is not None:
+                decodage += a
+                tmp = ""
         return decodage
 
     def enregistrement_decodage(self):
-        """Enregistre le fichier texte décodé."""
+        """ -> str
+        Renvoie et enregistre le fichier texte décodé.
+        """
         
         texte = open("fichier_decode.txt", "w", encoding='utf8')
-        a = self.decompression_texte()
+        a = self.decodage_texte()
         texte.write(a)
         texte.close()
         return a
