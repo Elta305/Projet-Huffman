@@ -2,31 +2,39 @@ import decryptage as d
 import cryptage as c
 
 class Fichier:
-    def __init__(self, f, c, t):
-        self.fichier = f
-        self.cle = c
-        self.texte_encode = t
+    def __init__(self, fn, f, c, t):
+        self._filename = fn
+        self._fichier = f
+        self._cle = c
+        self._texte_encode = t
     
-    # @property
-    # def fichier(self):
-    #     return self.fichier
-    
-    # @property
-    # def cle(self):
-    #     return self.cle
-    
-    # @property
-    # def texte_encode(self):
-    #     return self.texte_encode
-    
-    def set_fichier(self, fichier):
-        self.fichier = fichier
+    @property
+    def filename(self):
+        return self._filename
+    @filename.setter
+    def filename(self, fn):
+        self._filename = fn
 
-    def set_cle(self, cle):
-        self.cle = cle
-
-    def set_texte_encode(self, texte_encode):
-        self.texte_encode = texte_encode
+    @property
+    def fichier(self):
+        return self._fichier
+    @fichier.setter
+    def fichier(self, f):
+        self._fichier = f
+    
+    @property
+    def cle(self):
+        return self._cle
+    @cle.setter
+    def cle(self, c):
+        self._cle = c
+    
+    @property
+    def texte_encode(self):
+        return self._texte_encode
+    @texte_encode.setter
+    def texte_encode(self, te):
+        self._texte_encode = te
 
     def table_encodage(self):
         """
@@ -55,7 +63,7 @@ class Fichier:
         """ -> str
         Enregistre le fichier texte encodé."""
         
-        texte = open("fichier_encode.txt", "w")
+        texte = open(f"{self.filename}_encode.txt", "w")
         a = self.compression_texte()
         texte.write(a)
         texte.close()
@@ -65,11 +73,11 @@ class Fichier:
         """ -> str
         Enregistre la clé de l'encodage de Huffman."""
         
-        texte = open("cle_encodage.txt", "w", encoding='utf8')
+        texte = open(f"{self.filename}_cle.key", "w", encoding='utf8')
         dic = str(self.cle)
         texte.write(dic)
         texte.close()
-        return dic
+        return self.cle
 
     def decodage_texte(self):
         """ -> str
@@ -77,7 +85,6 @@ class Fichier:
         
         tmp = ""
         decodage = ""
-        self.cle = eval(self.cle)
         for code in self.texte_encode:
             tmp += code
             a = d.decodage_char(self.cle, tmp)
@@ -91,7 +98,10 @@ class Fichier:
         Renvoie et enregistre le fichier texte décodé.
         """
         
-        texte = open("fichier_decode.txt", "w", encoding='utf8')
+        if "_encode" in self.filename:
+            tmp = self.filename.split("_")
+            self.filename = tmp[0]
+        texte = open(f"{self.filename}_decode.txt", "w", encoding='utf8')
         a = self.decodage_texte()
         texte.write(a)
         texte.close()

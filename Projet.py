@@ -3,7 +3,7 @@ import tkinter.messagebox
 import tkinter.filedialog
 import customtkinter
 import fichiers as f
-# import affichage as a
+import affichage as a
 
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -47,7 +47,7 @@ class App(customtkinter.CTk):
         self.main_button_1.grid(row=0, column=3, padx=(20, 20), pady=(20, 20), sticky="nsew")
         self.main_button_2 = customtkinter.CTkButton(master=self, fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"), text="Décoder", command=self.decode)
         self.main_button_2.grid(row=1, column=3, padx=(20, 20), pady=(20, 20), sticky="nsew")
-        self.main_button_3 = customtkinter.CTkButton(master=self, fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"), text="Afficher Arbre")#, command=self.affichage_arbre)
+        self.main_button_3 = customtkinter.CTkButton(master=self, fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"), text="Afficher Arbre", command=self.affichage_arbre)
         self.main_button_3.grid(row=2, column=3, padx=(20, 20), pady=(20, 20), sticky="nsew")
 
         self.textbox_1 = customtkinter.CTkTextbox(self, width=250, height=50)
@@ -60,11 +60,11 @@ class App(customtkinter.CTk):
         self.appearance_mode_optionemenu.set("Dark")
         self.scaling_optionemenu.set("100%")
         self.textbox_1.insert("0.0", texte := "Texte à encoder")
-        self.textbox_2.insert("0.0", texte2 := "Clé de décodage")
-        self.textbox_3.insert("0.0", texte3 := "Texte encodé")
+        self.textbox_2.insert("0.0", texte2 := {'r': '000', ' ': '001', 'e': '01', 'T': '1000', 'x': '1001', 't': '1010', 'à': '1011', 'n': '1100', 'c': '1101', 'o': '1110', 'd': '1111'})
+        self.textbox_3.insert("0.0", texte3 := "1000011001101001001101100101110011011110111101000")
 
-        self.fichier = f.Fichier(texte, texte2, texte3)
-        # self.arbre = a.Interface()
+        self.fichier = f.Fichier("Fichier", texte, texte2, texte3)
+        self.arbre = None
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_appearance_mode(new_appearance_mode)
@@ -72,22 +72,29 @@ class App(customtkinter.CTk):
     def change_scaling_event(self, new_scaling: str):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         customtkinter.set_widget_scaling(new_scaling_float)
-
+    
+    def get_file_name(self, file_path):
+        file_path_components = file_path.split('/')
+        file_name = file_path_components[-1].rsplit('.', 1)
+        return file_name[0]
+    
     def load_file(self):
         ftypes = [('Text files', '*.txt'), ('All files', '*')]
         file_path = tkinter.filedialog.Open(self, filetypes=ftypes).show()
         texte = open(file_path, "r", encoding = 'utf8').read()
         self.textbox_1.delete("0.0", "end")
         self.textbox_1.insert("0.0", texte)
-        self.fichier.set_fichier(texte)
+        self.fichier.filename = self.get_file_name(file_path)
+        self.fichier.fichier = texte
     
     def load_key(self):
-        ftypes = [('Text files', '*.txt'), ('All files', '*')]
+        ftypes = [('Text files', '*.key'), ('All files', '*')]
         key_path = tkinter.filedialog.Open(self, filetypes=ftypes).show()
         cle = open(key_path, "r", encoding = 'utf8').read()
+        cle = eval(cle)
         self.textbox_2.delete("0.0", "end")
         self.textbox_2.insert("0.0", cle)
-        self.fichier.set_cle(cle)
+        self.fichier.cle = cle
         
     def load_encoded_file(self):
         ftypes = [('Text files', '*.txt'), ('All files', '*')]
@@ -95,7 +102,8 @@ class App(customtkinter.CTk):
         texte_encode = open(file_path, "r", encoding = 'utf8').read()
         self.textbox_3.delete("0.0", "end")
         self.textbox_3.insert("0.0", texte_encode)
-        self.fichier.set_texte_encode(texte_encode)
+        self.fichier.filename = self.get_file_name(file_path)
+        self.fichier.texte_encode = texte_encode
  
     def encode(self):
         self.fichier.table_encodage()
@@ -105,14 +113,17 @@ class App(customtkinter.CTk):
         self.textbox_2.insert("0.0", str(texte_cle))
         self.textbox_3.delete("0.0", "end")
         self.textbox_3.insert("0.0", texte_encode)
+        self.fichier.cle = texte_cle
+        self.fichier.texte_encode = texte_encode
 
     def decode(self):
         texte_decode = self.fichier.enregistrement_decodage()
         self.textbox_1.delete("0.0", "end")
         self.textbox_1.insert("0.0", texte_decode)
+        self.fichier.fichier = texte_decode
 
-    # def affichage_arbre(self):
-    #     a.afficher_arbre()
+    def affichage_arbre(self):
+        a.run()
     
 if __name__ == "__main__":
     app = App()
