@@ -80,122 +80,67 @@ class ArbreB:
             else:
                 self.inserer_recursif(valeur, sommet.droite.racine)
 
-    # def supprimer(self, valeur):
-    #     """
-    #     Supprime le sommet contenant la valeur spécifiée de l'arbre.
-
-    #     Args:
-    #         valeur (int): la valeur à supprimer de l'arbre.
-    #     """
-    #     # nouvel_arbre = ArbreB()
-    #     # nouvel_arbre = self.supprimer_recursif(valeur, self)
-    #     # return self.supprimer_recursif(valeur, self)
-    #     self.supprimer_recursif(valeur, self)
-
-    # def supprimer_recursif(self, valeur, sommet):
-    #     """
-    #     Fonction auxiliaire (def supprimer) pour supprimer un sommet contenant la valeur spécifiée de l'arbre de manière récursive.
-
-    #     Args:
-    #         valeur (int): la valeur à supprimer de l'arbre.
-    #         sommet (Sommet): le sommet à partir duquel commencer la recherche pour la suppression.
-
-    #     Returns:
-    #         Le nouveau sommet, après la suppression de la valeur spécifiée.
-    #     """
-
-    #     if sommet is None:
-    #         return sommet
-
-    #     if valeur < sommet.racine.valeur:
-    #         sommet.gauche = self.supprimer_recursif(
-    #             valeur, sommet.racine.gauche)
-
-    #     elif valeur > sommet.racine.valeur:
-    #         sommet.droite = self.supprimer_recursif(
-    #             valeur, sommet.droite.racine)
-
-    #     else:
-
-    #         # Si le sous-arbre gauche n'existe pas alors, on supprime le sommet actuel en le remplaçant par son sous-arbre droit.
-    #         if sommet.racine.gauche is None:
-    #             self.racine = sommet.racine.droite.racine
-
-    #         # Si le sous-arbre droit n'existe pas alors, on supprime le sommet actuel en le remplaçant par son sous-arbre gauche.
-    #         elif sommet.racine.droite is None:
-    #             self.racine = sommet.racine.gauche.racine
-
-    #         # Si le sommet à supprimer a deux fils, on le remplace par le plus petit sommet du sous-arbre droit.
-    #         else:
-    #             temp = self.trouver_min(sommet.racine.droite)
-    #             sommet.valeur = temp.racine.valeur
-    #             sommet.droite = self.supprimer_recursif(
-    #                 temp.racine.valeur, sommet.racine.droite)
-
-    # def trouver_min(self, sommet):
-    #     """
-    #     Trouve le plus petit sommet dans le sous-arbre droit.
-
-    #     Args:
-    #         sommet: Le sommet à partir duquel commencer la recherche.
-
-    #     Returns:
-    #         Le plus petit sommet.
-    #     """
-    #     while sommet.racine.gauche is not None:
-    #         sommet = sommet.gauche
-    #     return sommet
-
-    def supprimer(self, valeur):
-        """
-        Supprime un sommet contenant la valeur spécifiée de l'arbre.
-
-        Args:
-            valeur (int): la valeur à supprimer de l'arbre.
-        """
+    def supprimer_noeud(self, valeur):
+        """Supprime le noeud ayant la valeur spécifiée de l'arbre."""
         if self.racine is None:
             return
 
-        self.racine = self.supprimer_recursif(valeur, self.racine)
-
-    def supprimer_recursif(self, valeur, sommet):
-        """
-        Fonction auxiliaire (def supprimer) pour supprimer un sommet de l'arbre de manière récursive.
-
-        Args:
-            valeur (int): la valeur à supprimer de l'arbre.
-            sommet (Sommet): le sommet de l'arbre à partir duquel commencer la suppression récursive.
-
-        Returns:
-            Le nouveau sommet qui remplace le sommet supprimé (ou le même sommet si aucune suppression n'a eu lieu).
-        """
-        if sommet is None:
-            return None
-
-        if valeur < sommet.valeur:
-            sommet.gauche = self.supprimer_recursif(
-                valeur, sommet.gauche.racine)
-        elif valeur > sommet.valeur:
-            sommet.droite = self.supprimer_recursif(
-                valeur, sommet.droite.racine)
-        else:
-            if sommet.gauche is None:
-                return sommet.droite
-            elif sommet.droite is None:
-                return sommet.gauche
+        # Cherche le noeud à supprimer et son parent
+        parent = None
+        courant = self.racine
+        while courant is not None and courant.valeur != valeur:
+            parent = courant
+            if valeur < courant.valeur:
+                courant = courant.gauche.racine
             else:
-                # Trouver le plus grand sommet dans le sous-arbre gauche
-                # (ou le plus petit dans le sous-arbre droit)
-                plus_grand = sommet.gauche.racine
-                while plus_grand.droite is not None:
-                    plus_grand = plus_grand.droite.racine
+                courant = courant.droite.racine
 
-                # Supprimer le plus grand sommet et le remplacer par le sommet à supprimer
-                sommet.valeur = plus_grand.valeur
-                sommet.gauche.racine = self.supprimer_recursif(
-                    plus_grand.valeur, sommet.gauche.racine)
+        # Si le noeud n'a pas été trouvé, on sort de la fonction
+        if courant is None:
+            return
 
-        return sommet
+        # Cas 1: le noeud est une feuille
+        if courant.feuille():
+            if courant == self.racine:
+                self.racine = None
+            elif parent.gauche.racine == courant:
+                parent.gauche = None
+            else:
+                parent.droite.racine = None
+
+        # Cas 2: le noeud a un seul enfant
+        elif courant.gauche is None:
+            if courant == self.racine:
+                self.racine = courant.droite
+            elif parent.gauche == courant:
+                parent.gauche = courant.droite
+            else:
+                parent.droite = courant.droite
+        elif courant.droite is None:
+            if courant == self.racine:
+                self.racine = courant.gauche
+            elif parent.gauche == courant:
+                parent.gauche = courant.gauche
+            else:
+                parent.droite = courant.gauche
+
+        # Cas 3: le noeud a deux enfants
+        else:
+            # Trouve le plus petit noeud dans le sous-arbre droit
+            successeur = courant.droite
+            successeur_parent = courant
+            while successeur.racine.gauche is not None:
+                successeur_parent = successeur
+                successeur = successeur.racine.gauche
+
+            # Échange les valeurs entre le noeud à supprimer et son successeur
+            courant.valeur, successeur.racine.valeur = successeur.racine.valeur, courant.valeur
+
+            # Supprime le successeur (qui est maintenant une feuille ou a un enfant droit)
+            if successeur_parent.racine.gauche.racine == successeur.racine:
+                successeur_parent.racine.gauche = successeur.racine.droite
+            else:
+                successeur_parent.droite = successeur.droite
 
     def fusion(self, arbre1, arbre2):
         """
@@ -298,3 +243,29 @@ class ArbreB:
 
         return valeurs
 
+    def fusion_abr(self, arbre2):
+        """
+        Fusionne l'arbre courant avec l'arbre passé en argument. Les noeuds de l'arbre 2 sont insérés dans l'arbre courant.
+        """
+        noeuds_a_inserer = arbre2.parcours_prefixe(arbre2.racine)
+        for noeud in noeuds_a_inserer:
+            self.inserer(noeud)
+
+    def decomposition(self):
+        """
+        Découpe l'arbre courant en deux arbres, en enlevant le sous-arbre gauche ou le sous-arbre droit de la racine.
+        """
+        nouvelle_arbre = ArbreB()
+        if self.racine is None:
+            return
+
+        if self.racine.feuille():
+            return
+
+        if self.racine.droite is not None:
+            nouvelle_arbre.racine = self.racine.droite.racine
+            self.racine.droite = None
+
+        elif self.racine.gauche is not None:
+            nouvelle_arbre.racine = self.racine.gauche.racine
+            self.racine.gauche = None
