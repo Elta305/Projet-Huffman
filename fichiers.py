@@ -1,6 +1,4 @@
-import decryptage as d
-import cryptage as c
-
+import encodage as e
 
 class Fichier:
     def __init__(self, fn, f, c, t):
@@ -8,11 +6,10 @@ class Fichier:
         self._fichier = f
         self._cle = c
         self._texte_encode = t
-
+    
     @property
     def filename(self):
         return self._filename
-
     @filename.setter
     def filename(self, fn):
         self._filename = fn
@@ -20,45 +17,41 @@ class Fichier:
     @property
     def fichier(self):
         return self._fichier
-
     @fichier.setter
     def fichier(self, f):
         self._fichier = f
-
+    
     @property
     def cle(self):
         return self._cle
-
     @cle.setter
     def cle(self, c):
         self._cle = c
-
+    
     @property
     def texte_encode(self):
         return self._texte_encode
-
     @texte_encode.setter
     def texte_encode(self, te):
         self._texte_encode = te
 
     def creation_arbre(self):
-        """
+        """ -> abr
+        Renvoie un arbre de Huffman à partir du texte présent dans le fichier.
         """
         texte = self.fichier
-        t = c.Huffman(texte)
-        tab = t.occurence()
-        abr = t.creation_arbre(tab)
-        return abr
-
+        t = e.Huffman(texte)
+        dico = t.occurence()
+        abr = t.creation_arbre(dico)
+        return abr, t
+    
     def table_encodage(self):
         """
         Attribue à self.cle un tableau avec tous les éléments d'un fichier texte codés selon l'encodage de Huffman.
         """
-
-        texte = self.fichier
-        t = c.Huffman(texte)
-        tab = t.occurence()
-        abr = t.creation_arbre(tab)
+        
+        abr = self.creation_arbre()
+        abr, t = abr[0], abr[1]
         self.cle = t.creation_table_encodage(abr)
 
     def compression_texte(self):
@@ -67,7 +60,7 @@ class Fichier:
         Returns:
             Le texte encodé en binaire.
         """
-
+        
         encodage = ""
         for lettre in self.fichier:
             encodage += self.cle.get(lettre)
@@ -75,8 +68,9 @@ class Fichier:
 
     def enregistrement_encodage(self):
         """ -> str
-        Enregistre le fichier texte encodé."""
-
+        Enregistre le fichier texte encodé.
+        """
+        
         texte = open(f"{self.filename}_encode.txt", "w")
         a = self.compression_texte()
         texte.write(a)
@@ -85,8 +79,9 @@ class Fichier:
 
     def enregistrement_cle(self):
         """ -> str
-        Enregistre la clé de l'encodage de Huffman."""
-
+        Enregistre la clé de l'encodage de Huffman.
+        """
+        
         texte = open(f"{self.filename}_cle.key", "w", encoding='utf8')
         dic = str(self.cle)
         texte.write(dic)
@@ -95,13 +90,14 @@ class Fichier:
 
     def decodage_texte(self):
         """ -> str
-        Renvoie un texte décodé."""
-
+        Renvoie un texte décodé.
+        """
+        
         tmp = ""
         decodage = ""
         for code in self.texte_encode:
             tmp += code
-            a = d.decodage_char(self.cle, tmp)
+            a = e.decodage_char(self.cle, tmp)
             if a is not None:
                 decodage += a
                 tmp = ""
@@ -111,7 +107,7 @@ class Fichier:
         """ -> str
         Renvoie et enregistre le fichier texte décodé.
         """
-
+        
         if "_encode" in self.filename:
             tmp = self.filename.split("_")
             self.filename = tmp[0]
